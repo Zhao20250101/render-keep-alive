@@ -12,9 +12,14 @@ jobs:
 
     steps:
       - name: Ping Render service
+        env:
+          RENDER_URL: ${{ secrets.RENDER_URL }}
         run: |
-          URL="https://quickly-vertex.onrender.com"
-          echo "Pinging $URL at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          if [ -z "$RENDER_URL" ]; then
+            echo "::error::RENDER_URL secret is not set"
+            exit 1
+          fi
+          echo "Pinging $RENDER_URL at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
           curl -sS -m 60 --retry 3 --retry-delay 5 --retry-connrefused \
             -o /dev/null -w "HTTP status: %{http_code}\nTime: %{time_total}s\n" \
-            "$URL" || true
+            "$RENDER_URL" || true
